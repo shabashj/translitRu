@@ -1,0 +1,13 @@
+{
+  "description": "Transliteration input in editable fields",
+  "manifest_version": 2,
+  "name": "translitRu",
+  "version": "1.0",
+
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["translit.js"]
+    }
+  ]
+}
