@@ -1,7 +1,7 @@
 document.body.style.border = "5px solid red"
 
-var isEnable = false;
-var alphabetMap = {
+let isEnable = false;
+const alphabetMap = {
     'a': 'а',
     'b': 'б',
     'v': 'в',
@@ -31,7 +31,7 @@ var alphabetMap = {
     'shh': 'щ',
     '#': 'ъ',
     'y': 'ы',
-    '\'': 'ь',
+    "'": 'ь',
     'je': 'э',
     'ju': 'ю',
     'ja': 'я',
@@ -64,58 +64,76 @@ var alphabetMap = {
     'Shh': 'Щ',
     '##': 'Ъ',
     'Y': 'Ы',
-    '\'\'': 'Ь',
+    "''": 'Ь',
     'Je': 'Э',
     'Ju': 'Ю',
     'Ja': 'Я',
-}
+};
+
+const specialChars = ['j', 'z', 'c', 's', 'J', 'Z', 'C', 'S', "'", '#'];
+const combinations = ['jo', 'jo', 'ja', 'zh', 'c', 's', 'J', 'Z', 'C', 'S', "'", '#'];
 
 function startTranslit() {
     listenToEnableKey();
 };
 
 function enableListener(event) {
-    var key = event.key;
-    var element = event.srcElement;
-    var isKey = event.keyCode === 113;
-    var isShift = event.shiftKey;
+    const key = event.key;
+    let element = event.srcElement;
+    const isStartKey = event.keyCode === 113;
+    const isSelectAll = (event.keyCode === 65 && event.ctrlKey === true);
+    const isShift = event.shiftKey;
 
-    if (isShift && isKey) {
+    if (isShift && isStartKey) {
         isEnable = !isEnable;
-        isEnable ? 
-            document.body.style.border = "5px solid green" : 
-                document.body.style.border = "5px solid red";
+
+        if (isEnable) {
+            document.body.style.border = "5px solid green";
+        } else {
+            document.body.style.border = "5px solid red";
+        }
     }
 
-    if (!isEnable) {
+    if (!isEnable || !alphabetMap[key] || !isSelectAll) {
         return;
     }
 
     if (isInInputField(element)) {
-        translitChar(key, element);
+        translitInputText(key, element);
+    }
+
+    if (isDiv(element)) {
+        translitDiv(key, element);
     }
 }
-
-// function isLatinChar(char) {
-//     return char.match(/[a-zA-Z]+/g);
-// }
 
 function isInInputField(element) {
-    return element instanceof HTMLInputElement && element.type == 'text';
+    return element.type == 'text' || element.type == 'textarea';
 }
 
-function translitChar(char, element) {
-    var inputValue = element.value;
+function isDiv(element) {
+    return element.tagName === 'DIV';
+}
 
-    if (!alphabetMap[char]) {
-        return;
-    }
-
+function translitInputText(char, element) {
+    const inputValue = element.value;
     element.value = element.value.slice(0, element.value.length - 1) + alphabetMap[char];
+}
+
+function translitDiv(char, element) {
+    const length = element.innerText.length;
+    element.innerText = element.innerText.slice(0, length - 1) + alphabetMap[char];
+    // move caret to end of the word
+    let sel = window.getSelection();
+    let range = document.createRange();
+    range.setStart(element.childNodes[0], length);
+    sel.removeAllRanges();
+    sel.addRange(range);
 }
 
 function listenToEnableKey() {
     document.addEventListener("keyup", enableListener);
 };
+
 
 startTranslit();
